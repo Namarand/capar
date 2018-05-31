@@ -4,6 +4,7 @@ Tie::TieNode::TieNode()
 {
     for (unsigned i = 0; i < 26; i++)
         child_[i] = nullptr;
+    value_.store(-1);
 }
 
 Tie::TieNode::~TieNode()
