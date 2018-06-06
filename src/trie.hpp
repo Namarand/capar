@@ -18,16 +18,16 @@ class Trie : public IAsyncDictionary
             const std::atomic<TrieNode*>& get(char) const;
             std::atomic<TrieNode*>& get(const std::string&, unsigned);
             const std::atomic<TrieNode*>& get(const std::string&, unsigned) const;
-            std::future<void> insert(const std::string&);
-            std::future<void> erase(const std::string&);
-            std::future<std::pair<std::string, int>> search(const std::string&) const;
-            int value_get() const;
-            void value_set(int);
+            void insert(const std::string&);
+            void erase(const std::string&);
+            std::pair<std::string, int> search(const std::string&) const;
+            bool is_eow() const;
+            void eow_set(bool);
             void add(TrieNode*, char);
             void add(TrieNode*, const std::string&, unsigned);
         private:
             std::atomic<TrieNode*> child_[26];
-            std::atomic_int value_;
+            std::atomic_bool eow_;
     };
     public:
         virtual void init(const std::vector<std::string>& word_list);
