@@ -37,6 +37,6 @@ class Trie : public IAsyncDictionary
 
     private:
         std::atomic<TrieNode*> root_;
-        std::atomic_size_t read_write_counter_;
+        mutable std::atomic_size_t read_write_counter_;
         std::atomic_size_t remove_counter_;
 };
