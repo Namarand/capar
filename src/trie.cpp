@@ -11,7 +11,7 @@ std::future<std::pair<std::string, int>> Trie::search(const std::string& w) cons
 {
     while (remove_counter_.load() > 0) {}
     read_write_counter_.fetch_add(1);
-    auto res = root_.search(w);
+    auto res = root_.load()->search(w);
     read_write_counter_.fetch_sub(1);
     return res;
 }
@@ -20,7 +20,7 @@ std::future<void> Trie::insert(const std::string& w)
 {
     while (remove_counter_.load() > 0) {}
     read_write_counter_.fetch_add(1);
-    root_.insert(w);
+    root_.load()->insert(w);
     read_write_counter_.fetch_sub(1);
 }
 
@@ -28,6 +28,6 @@ std::future<void> Trie::erase(const std::string& w)
 {
     remove_counter_.fetch_add(1);
     while (read_write_counter_.load() > 0) {}
-    root_.erase(w);
+    root_.load()->erase(w);
     remove_counter_.fetch_sub(1);
 }
