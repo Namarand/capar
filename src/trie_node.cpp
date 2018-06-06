@@ -69,14 +69,21 @@ void Trie::TrieNode::insert(const std::string& s)
         add(node, first_char);
     }
     node->insert(s.substr(1, s.length() - 1));
-
 }
 
 void Trie::TrieNode::erase(const std::string& s)
 {
+    if (s.empty())
+        eow_set(false);
+    else
+    {
+        char first_char = s.front();
+        auto node = get(first_char).load();
+        if (node != nullptr)
+            node->erase(s.substr(1, s.length() - 1));
+    }
 }
 
 std::pair<std::string, int> Trie::TrieNode::search(const std::string& s) const
 {
 }
-
