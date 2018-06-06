@@ -1,4 +1,4 @@
-#include "tie.hpp"
+#include "trie.hpp"
 
 void Trie::init(const std::vector<std::string>& word_list)
 {

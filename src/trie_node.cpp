@@ -1,4 +1,4 @@
-#include "tie.hpp"
+#include "trie.hpp"
 
 Trie::TrieNode::TrieNode()
 {
