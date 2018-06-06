@@ -11,7 +11,7 @@ std::pair<std::string, int> Trie::search(const std::string& w)
 {
     while (remove_counter_.load() > 0) {}
     atomic_fetch_add(read_write_counter_, 1);
-    root_.insert(w);
+    root_.search(w);
     atomic_fetch_sub(read_write_counter_, 1);
 }
 
