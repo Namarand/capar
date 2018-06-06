@@ -44,12 +44,12 @@ void Tie::TieNode::add(Tie::TieNode* node, const std::string& s, unsigned u)
     add(node, s[u]);
 }
 
-intmax_t Tie::TieNode::value_get() const
+int Tie::TieNode::value_get() const
 {
     return value_.load();
 }
 
-void Tie::TieNode::value_set(intmax_t v)
+void Tie::TieNode::value_set(int v)
 {
     value_.store(v);
 }

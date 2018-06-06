@@ -18,13 +18,13 @@ class Tie : public IDictionary
             const std::atomic<TieNode*>& get(char) const;
             std::atomic<TieNode*>& get(const std::string&, unsigned);
             const std::atomic<TieNode*>& get(const std::string&, unsigned) const;
-            intmax_t value_get() const;
-            void value_set(intmax_t);
+            int value_get() const;
+            void value_set(int);
             void add(TieNode*, char);
             void add(TieNode*, const std::string&, unsigned);
         private:
             std::atomic<TieNode*> child_[26];
-            std::atomic_intmax_t value_;
+            std::atomic_int value_;
     };
 
     private:
