@@ -4,9 +4,9 @@
 #include <optional>
 #include <string>
 
-#include "IDictionary.hpp"
+#include "IAsyncDictionary.hpp"
 
-class Trie : public IDictionary
+class Trie : public IAsyncDictionary
 {
     // Inner class
     class TrieNode
