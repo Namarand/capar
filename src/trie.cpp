@@ -10,23 +10,24 @@ void Trie::init(const std::vector<std::string>& word_list)
 std::future<std::pair<std::string, int>> Trie::search(const std::string& w) const
 {
     while (remove_counter_.load() > 0) {}
-    atomic_fetch_add(read_write_counter_, 1);
-    root_.search(w);
-    atomic_fetch_sub(read_write_counter_, 1);
+    read_write_counter_.fetch_add(1);
+    auto res = root_.search(w);
+    read_write_counter_.fetch_sub(1);
+    return res;
 }
 
 std::future<void> Trie::insert(const std::string& w)
 {
     while (remove_counter_.load() > 0) {}
-    atomic_fetch_add(read_write_counter_, 1);
+    read_write_counter_.fetch_add(1);
     root_.insert(w);
-    atomic_fetch_sub(read_write_counter_, 1);
+    read_write_counter_.fetch_sub(1);
 }
 
 std::future<void> Trie::erase(const std::string& w)
 {
-    atomic_fetch_add(remove_counter_, 1);
+    remove_counter_.fetch_add(1);
     while (read_write_counter_.load() > 0) {}
     root_.erase(w);
-    atomic_fetch_sub(remove_counter_, 1);
+    remove_counter_.fetch_sub(1);
 }
