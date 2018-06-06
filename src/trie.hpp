@@ -29,6 +29,11 @@ class Trie : public IAsyncDictionary
             std::atomic<TrieNode*> child_[26];
             std::atomic_int value_;
     };
+    public:
+        virtual void init(const std::vector<std::string>& word_list);
+        virtual std::future<result_t> search(const std::string& w) const;
+        virtual std::future<void> insert(const std::string& w);
+        virtual std::future<void> erase(const std::string& w);
 
     private:
         std::atomic<TrieNode*> root_;
