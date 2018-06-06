@@ -7,7 +7,7 @@ void Trie::init(const std::vector<std::string>& word_list)
         insert(s);
 }
 
-std::future<std::pair<std::string, int>> Trie::search(const std::string& w)
+std::future<std::pair<std::string, int>> Trie::search(const std::string& w) const
 {
     while (remove_counter_.load() > 0) {}
     atomic_fetch_add(read_write_counter_, 1);
