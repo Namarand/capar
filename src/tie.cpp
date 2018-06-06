@@ -1,46 +1,32 @@
 #include "tie.hpp"
 
-Tie::TieNode::TieNode()
+void Tie::init(const std::vector<std::string>& word_list)
 {
-    for (unsigned i = 0; i < 26; i++)
-        child_[i] = nullptr;
+    //RESET
+    for (auto const s: word_list)
+        insert(s);
 }
 
-Tie::TieNode::~TieNode()
+std::pair<std::string, int> Tie::search(const std::string& w)
 {
-    for (unsigned i = 0; i < 26; i++)
-        if (child_[i].load() != nullptr)
-            delete child_[i];
+    while (remove_counter_.load() > 0) {}
+    atomic_fetch_add(read_write_counter_, 1);
+    root_.insert(w);
+    atomic_fetch_sub(read_write_counter_, 1);
 }
 
-std::atomic<Tie::TieNode*>& Tie::TieNode::get(char c)
+void Tie::insert(const std::string& w)
 {
-    return child_[c - 'a'];
+    while (remove_counter_.load() > 0) {}
+    atomic_fetch_add(read_write_counter_, 1);
+    root_.insert(w);
+    atomic_fetch_sub(read_write_counter_, 1);
 }
 
-const std::atomic<Tie::TieNode*>& Tie::TieNode::get(char c) const
+void Tie::erase(const std::string& w)
 {
-    return child_[c - 'a'];
+    atomic_fetch_add(remove_counter_, 1);
+    while (read_write_counter_.load() > 0) {}
+    root_.erase(w);
+    atomic_fetch_sub(remove_counter_, 1);
 }
-
-std::atomic<Tie::TieNode*>& Tie::TieNode::get(const std::string& s, unsigned u)
-{
-    return get(s[u]);
-}
-
-const std::atomic<Tie::TieNode*>& Tie::TieNode::get(const std::string& s, unsigned u) const
-{
-    return get(s[u]);
-}
-
-void Tie::TieNode::add(Tie::TieNode* node, char c)
-{
-    child_[c - 'a'] = node;
-}
-
-void Tie::TieNode::add(Tie::TieNode* node, const std::string& s, unsigned u)
-{
-    add(node, s[u]);
-}
-
-int main(){}

@@ -28,6 +28,7 @@ class Tie : public IDictionary
     };
 
     private:
+        std::atomic<TieNode*> root_;
         std::atomic_size_t read_write_counter_;
         std::atomic_size_t remove_counter_;
 };
