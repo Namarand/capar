@@ -113,7 +113,7 @@ std::pair<std::string, int> Trie::TrieNode::search(const std::string& s) const
     return std::pair<std::string, int>(closest, distance);
 }
 
-void Trie::TrieNode::search_rec(char ch, std::vector<int> last_row, const std::string& word, std::string& closest, int& distance)
+void Trie::TrieNode::search_rec(char ch, const std::vector<int>& last_row, const std::string& word, std::string& closest, int& distance)
 {
     std::size_t sz = last_row.size();
 
