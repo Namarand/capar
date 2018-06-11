@@ -3,6 +3,7 @@
 #include <atomic>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "IAsyncDictionary.hpp"
 
@@ -18,18 +19,21 @@ class Trie : public IAsyncDictionary
             const std::atomic<TrieNode*>& get(char) const;
             std::atomic<TrieNode*>& get(const std::string&, unsigned);
             const std::atomic<TrieNode*>& get(const std::string&, unsigned) const;
-            void insert(const std::string&);
+            void insert(const std::string&, std::size_t);
             void erase(const std::string&);
             std::pair<std::string, int> search(const std::string&) const;
             bool is_eow() const;
-            void eow_set(bool);
+            void word_set(std::string);
+            std::string word_get();
             void add(TrieNode*, char);
             void add(TrieNode*, const std::string&, unsigned);
         private:
-            std::atomic<TrieNode*> child_[26];
-            std::atomic_bool eow_;
+            void search_rec(char, std::vector<int>, const std::string&, std::string&, int&);
+            std::atomic<TrieNode*> child_[27];
+            std::atomic<std::string*> word_;
     };
     public:
+        Trie();
         virtual void init(const std::vector<std::string>& word_list);
         virtual std::future<result_t> search(const std::string& w) const;
         virtual std::future<void> insert(const std::string& w);
