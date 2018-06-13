@@ -107,13 +107,16 @@ std::pair<std::string, int> Trie::TrieNode::search(const std::string& s) const
 
     for (std::size_t i = 0 ; i < sz; ++i) {
         if (get(s[i]).load() != nullptr) {
-            get(s[i]).load()->search_rec(s[i], current_row, s, closest, distance);
+            std::vector<int> v;
+            std::string string = "";
+            string += s[i];
+            get(s[i]).load()->search_rec(0, current_row, v, s, string, closest, distance);
         }
     }
     return std::pair<std::string, int>(closest, distance);
 }
 
-void Trie::TrieNode::search_rec(char ch, const std::vector<int>& last_row, const std::string& word, std::string& closest, int& distance)
+void Trie::TrieNode::search_rec(std::size_t cnt, const std::vector<int>& last_row, const std::vector<int>& llast_row, const std::string& word, const std::string& str, std::string& closest, int& distance)
 {
     std::size_t sz = last_row.size();
 
@@ -123,8 +126,11 @@ void Trie::TrieNode::search_rec(char ch, const std::vector<int>& last_row, const
     // Calculate the min cost of insertion, deletion, match or substution
     int insert_or_del, replace;
     for (std::size_t i = 1; i < sz; ++i) {
+        int cost = 1;
+        if (word[i-1] == str[cnt])
+            cost = 0;
         insert_or_del = std::min(current_row[i-1] + 1, last_row[i] + 1);
-        replace = (word[i-1] == ch) ? last_row[i-1] : (last_row[i-1] + 1);
+        replace = last_row[i-1] + cost;
 
         current_row[i] = std::min(insert_or_del, replace);
     }
@@ -136,12 +142,17 @@ void Trie::TrieNode::search_rec(char ch, const std::vector<int>& last_row, const
         closest = word_get();
     }
 
+//    if i > 1 and j > 1 and a[i] = b[j-1] and a[i-1] = b[j] then
+//        d[i, j] := minimum(d[i, j],
+//                               d[i-2, j-2] + cost)  // transposition
+
     // If there is an element wich is smaller than the current minimum cost,
     //  we can have another cost smaller than the current minimum cost
     if (*std::min_element(current_row.begin(), current_row.end()) < distance) {
         for (std::size_t i = 0; i < 27; i++) {
-            if (get('a' + i).load() != nullptr)
-                get('a' + i).load()->search_rec('a' + i, current_row, word, closest, distance);
+            char val = 'a' + i;
+            if (get(val).load() != nullptr)
+                get(val).load()->search_rec(cnt + 1, current_row, last_row, word, str + val, closest, distance);
         }
     }
 }
