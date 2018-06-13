@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 #include <limits>
 
 #include "trie.hpp"
@@ -100,59 +101,59 @@ std::pair<std::string, int> Trie::TrieNode::search(const std::string& s) const
     std::size_t sz = s.size();
 
     // Naive DP initialization
-    std::vector<int> current_row(sz + 1);
+    std::vector<int> current(sz + 1);
     for (std::size_t i = 0; i < sz; ++i)
-        current_row[i] = i;
-    current_row[sz] = sz;
+        current[i] = i;
+    current[sz] = sz;
 
     for (std::size_t i = 0 ; i < sz; ++i) {
         if (get(s[i]).load() != nullptr) {
             std::vector<int> v;
             std::string string = "";
             string += s[i];
-            get(s[i]).load()->search_rec(0, current_row, v, s, string, closest, distance);
+            get(s[i]).load()->search_rec(1, current, v, s, string, closest, distance);
         }
     }
     return std::pair<std::string, int>(closest, distance);
 }
 
-void Trie::TrieNode::search_rec(std::size_t cnt, const std::vector<int>& last_row, const std::vector<int>& llast_row, const std::string& word, const std::string& str, std::string& closest, int& distance)
+void Trie::TrieNode::search_rec(std::size_t cnt, const std::vector<int>& prev, const std::vector<int>& pprev, const std::string& word, const std::string& str, std::string& closest, int& distance)
 {
-    std::size_t sz = last_row.size();
+    std::size_t sz = prev.size();
 
-    std::vector<int> current_row(sz);
-    current_row[0] = last_row[0] + 1;
+    std::vector<int> current(sz);
+    current[0] = cnt;
 
     // Calculate the min cost of insertion, deletion, match or substution
-    int insert_or_del, replace;
     for (std::size_t i = 1; i < sz; ++i) {
-        int cost = 1;
-        if (word[i-1] == str[cnt])
-            cost = 0;
-        insert_or_del = std::min(current_row[i-1] + 1, last_row[i] + 1);
-        replace = last_row[i-1] + cost;
-
-        current_row[i] = std::min(insert_or_del, replace);
+        if (word[cnt - 1] == str[i - 1])
+            current[i] = prev[i - 1];
+        else
+        {
+            int tmp = std::min({current[i - 1], prev[i - 1], prev[cnt]});
+            if (i >= 2 && cnt >= 2 && word[cnt - 1] == str[i - 2] && word[cnt - 2] == str[i - 1])
+                tmp = std::min(current[i], pprev[i - 2]);
+            current[i] = 1 + tmp;
+        }
     }
 
     // When we find a cost that is less than the min_cost, is because
     // it is the minimum until the current row, so we update
-    if ((current_row[sz-1] < distance) && is_eow()) {
-        distance = current_row[sz-1];
+    if ((current[sz-1] < distance) && is_eow()) {
+            distance = current[sz - 1];
         closest = word_get();
     }
-
-//    if i > 1 and j > 1 and a[i] = b[j-1] and a[i-1] = b[j] then
-//        d[i, j] := minimum(d[i, j],
-//                               d[i-2, j-2] + cost)  // transposition
+/*
+    for (auto e: current)
+        std::cout << e << " ";
+    std::cout << std::endl;
+*/
 
     // If there is an element wich is smaller than the current minimum cost,
     //  we can have another cost smaller than the current minimum cost
-    if (*std::min_element(current_row.begin(), current_row.end()) < distance) {
-        for (std::size_t i = 0; i < 27; i++) {
-            char val = 'a' + i;
-            if (get(val).load() != nullptr)
-                get(val).load()->search_rec(cnt + 1, current_row, last_row, word, str + val, closest, distance);
-        }
+    for (std::size_t i = 0; i < 27; i++) {
+        char val = 'a' + i;
+        if (get(val).load() != nullptr)
+            get(val).load()->search_rec(cnt + 1, current, prev, word, str + val, closest, distance);
     }
 }
