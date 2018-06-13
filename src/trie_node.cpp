@@ -96,6 +96,8 @@ void Trie::TrieNode::erase(const std::string& s)
 
 std::pair<std::string, int> Trie::TrieNode::search(const std::string& s) const
 {
+    if (exist(s, 0))
+        return std::pair<std::string, int>(s, 0);
     std::string closest = "";
     int distance = std::numeric_limits<int>::max();
     std::size_t sz = s.size();
@@ -156,4 +158,14 @@ void Trie::TrieNode::search_rec(std::size_t cnt, const std::vector<int>& prev, c
         if (get(val).load() != nullptr)
             get(val).load()->search_rec(cnt + 1, current, prev, word, str + val, closest, distance);
     }
+}
+
+bool Trie::TrieNode::exist(const std::string& s, std::size_t index) const
+{
+    if (s.length() == index)
+        return is_eow();
+    if (get(s, index).load() != nullptr)
+        return get(s, index).load()->exist(s, index + 1);
+    else
+        return false;
 }

@@ -28,6 +28,7 @@ class Trie : public IAsyncDictionary
             void add(TrieNode*, char);
             void add(TrieNode*, const std::string&, unsigned);
         private:
+            bool exist(const std::string&, std::size_t) const;
             void search_rec(std::size_t, const std::vector<int>&, const std::vector<int>&, const std::string&, const std::string&, std::string&, int&);
             std::atomic<TrieNode*> child_[27];
             std::atomic<std::string*> word_;
