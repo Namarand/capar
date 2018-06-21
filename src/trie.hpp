@@ -20,18 +20,18 @@ class Trie : public IAsyncDictionary
             std::atomic<TrieNode*>& get(const std::string&, unsigned);
             const std::atomic<TrieNode*>& get(const std::string&, unsigned) const;
             void insert(const std::string&, std::size_t);
-            void erase(const std::string&);
+            void erase(const std::string&, std::size_t);
             std::pair<std::string, int> search(const std::string&) const;
             bool is_eow() const;
-            void word_set(std::string);
-            std::string word_get();
+            void eow_set(bool);
             void add(TrieNode*, char);
             void add(TrieNode*, const std::string&, unsigned);
+            void dummy_search(const std::string, const std::string, int&, std::string&);
         private:
             bool exist(const std::string&, std::size_t) const;
             void search_rec(std::size_t, const std::vector<int>&, const std::vector<int>&, const std::string&, const std::string&, std::string&, int&);
-            std::atomic<TrieNode*> child_[27];
-            std::atomic<std::string*> word_;
+            std::atomic<TrieNode*> child_[26];
+            std::atomic_bool eow_;
     };
     public:
         Trie();
@@ -42,6 +42,4 @@ class Trie : public IAsyncDictionary
 
     private:
         std::atomic<TrieNode*> root_;
-        mutable std::atomic_size_t read_write_counter_;
-        std::atomic_size_t remove_counter_;
 };

@@ -2,20 +2,19 @@
 #include <iostream>
 #include <limits>
 
+#include "tools.hpp"
 #include "trie.hpp"
 
 Trie::TrieNode::TrieNode()
 {
-    for (unsigned i = 0; i < 27; i++)
+    for (unsigned i = 0; i < 26; i++)
         child_[i] = nullptr;
-    word_.store(nullptr);
+    eow_.store(false);
 }
 
 Trie::TrieNode::~TrieNode()
 {
-    if (word_.load() != nullptr)
-        delete word_.load();
-    for (unsigned i = 0; i < 27; i++)
+    for (unsigned i = 0; i < 26; i++)
         if (child_[i].load() != nullptr)
             delete child_[i];
 }
@@ -52,24 +51,19 @@ void Trie::TrieNode::add(Trie::TrieNode* node, const std::string& s, unsigned u)
 
 bool Trie::TrieNode::is_eow() const
 {
-    return word_.load() != nullptr;
+    return eow_.load();
 }
 
-void Trie::TrieNode::word_set(std::string s)
+void Trie::TrieNode::eow_set(bool b)
 {
-    word_.store(new std::string(s));
-}
-
-std::string Trie::TrieNode::word_get()
-{
-    return *word_.load();
+    eow_.store(b);
 }
 
 void Trie::TrieNode::insert(const std::string& s, std::size_t index)
 {
     if (index == s.length())
     {
-        word_set(s);
+        eow_set(true);
         return;
     }
     auto node = get(s, index).load();
@@ -81,16 +75,35 @@ void Trie::TrieNode::insert(const std::string& s, std::size_t index)
     node->insert(s, index + 1);
 }
 
-void Trie::TrieNode::erase(const std::string& s)
+void Trie::TrieNode::erase(const std::string& s, std::size_t index)
 {
-    if (s.empty())
-        word_.store(nullptr);
+    if (index == s.length())
+        eow_set(false);
     else
     {
-        char first_char = s.front();
+        char first_char = s[index];
         auto node = get(first_char).load();
         if (node != nullptr)
-            node->erase(s.substr(1, s.length() - 1));
+            node->erase(s, index + 1);
+    }
+}
+
+void Trie::TrieNode::dummy_search(const std::string s, const std::string actual, int& min, std::string& closest)
+{
+    if (is_eow())
+    {
+        int dist = levenshtein(s, actual);
+        if (dist < min)
+        {
+            min = dist;
+            closest = actual;
+        }
+    }
+    for (std::size_t i = 0; i < 26; ++i)
+    {
+        char c = 'a' + i;
+        if (get(c).load() != nullptr)
+            get(c).load()->dummy_search(s, actual + c, min, closest);
     }
 }
 
@@ -140,16 +153,12 @@ void Trie::TrieNode::search_rec(std::size_t y, const std::vector<int>& prev, con
         }
     }
 
-    // When we find a cost that is less than the min_cost, is because
-    // it is the minimum until the current row, so we update
     if ((current[sz-1] < distance) && is_eow()) {
         distance = current[sz - 1];
-        closest = word_get();
+        closest = str;
     }
 
-    // If there is an element wich is smaller than the current minimum cost,
-    //  we can have another cost smaller than the current minimum cost
-    for (std::size_t index = 0; index < 27; index++) {
+    for (std::size_t index = 0; index < 26; index++) {
         char val = 'a' + index;
         if (get(val).load() != nullptr)
             get(val).load()->search_rec(y + 1, current, prev, word, str + val, closest, distance);
