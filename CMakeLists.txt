@@ -24,6 +24,9 @@ add_library(dictionary
   src/naive_dictionary.cpp
   src/naive_async_dictionary.cpp
   src/tools.cpp
+
+  src/trie.cpp
+  src/trie_node.cpp
   )
 
 set_source_files_properties(src/tools.cpp PROPERTIES COMPILE_DEFINITIONS WORD_LIST_FILE="${CMAKE_SOURCE_DIR}/words_alpha.txt")
