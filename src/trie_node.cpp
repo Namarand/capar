@@ -119,44 +119,40 @@ std::pair<std::string, int> Trie::TrieNode::search(const std::string& s) const
     return std::pair<std::string, int>(closest, distance);
 }
 
-void Trie::TrieNode::search_rec(std::size_t cnt, const std::vector<int>& prev, const std::vector<int>& pprev, const std::string& word, const std::string& str, std::string& closest, int& distance)
+void Trie::TrieNode::search_rec(std::size_t y, const std::vector<int>& prev, const std::vector<int>& pprev, const std::string& str, const std::string& word, std::string& closest, int& distance)
 {
     std::size_t sz = prev.size();
 
-    std::vector<int> current(sz);
-    current[0] = cnt;
+    std::vector<int> current(sz + 1);
+    current[0] = y;
 
     // Calculate the min cost of insertion, deletion, match or substution
-    for (std::size_t i = 1; i < sz; ++i) {
-        if (word[cnt - 1] == str[i - 1])
-            current[i] = prev[i - 1];
+    for (std::size_t x = 1; x < sz; ++x) {
+        if (word[y - 1] == str[x - 1])
+            current[x] = prev[x - 1];
         else
         {
-            int tmp = std::min({current[i - 1], prev[i - 1], prev[cnt]});
-            if (i >= 2 && cnt >= 2 && word[cnt - 1] == str[i - 2] && word[cnt - 2] == str[i - 1])
-                tmp = std::min(current[i], pprev[i - 2]);
-            current[i] = 1 + tmp;
+            int tmp = std::min({current[x - 1], prev[x - 1], prev[x]});
+            if (x >= 2 && y >= 2 && word[y - 1] == str[x - 2] && word[y - 2] == str[x - 1])
+                if (pprev[x - 2] < tmp)
+                    tmp = pprev[x - 2];
+            current[x] = 1 + tmp;
         }
     }
 
     // When we find a cost that is less than the min_cost, is because
     // it is the minimum until the current row, so we update
     if ((current[sz-1] < distance) && is_eow()) {
-            distance = current[sz - 1];
+        distance = current[sz - 1];
         closest = word_get();
     }
-/*
-    for (auto e: current)
-        std::cout << e << " ";
-    std::cout << std::endl;
-*/
 
     // If there is an element wich is smaller than the current minimum cost,
     //  we can have another cost smaller than the current minimum cost
-    for (std::size_t i = 0; i < 27; i++) {
-        char val = 'a' + i;
+    for (std::size_t index = 0; index < 27; index++) {
+        char val = 'a' + index;
         if (get(val).load() != nullptr)
-            get(val).load()->search_rec(cnt + 1, current, prev, word, str + val, closest, distance);
+            get(val).load()->search_rec(y + 1, current, prev, word, str + val, closest, distance);
     }
 }
 
